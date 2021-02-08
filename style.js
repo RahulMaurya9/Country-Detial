@@ -5,7 +5,8 @@ const countriesContainer = document.querySelector('.countries');
 let count = 0
 
 ///////////////////////////////////////
-const renderCountry = function (data, className = '') {
+const renderCountry = function (data, className = '') {,
+
   const html = `
   <article class="country ${className}">
     <img class="country__img" src="${data.flag}" />
@@ -50,9 +51,26 @@ const getCountryData = function (country) {
       renderError(err)
     });
 };
+const getPosition = function () {
+  return new Promise(function (resolve, reject) {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+};
+const whereIam = async function (country) {
+  const pos = await getPosition()
+  // console.log(pos);
+  const { latitude:lat , longitude:lng}=pos.coords
+  const geoLoc = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+  console.log(geoLoc);
+  const data1  = await geoLoc.json()
+  console.log(data1);
+  const res = await fetch(`https://restcountries.eu/rest/v2/name/${data1.country}`);
+  const data = await res.json();
+  renderCountry(data[0]);
+};
 btn.addEventListener('click', function () {
   if(count===0){
-    getCountryData('germanys');
+    whereIam()
   }
   count++
   console.log(count);
